@@ -1,3 +1,5 @@
+package com.jju;
+
 public abstract class SmartDevice {
     private String name;
 
