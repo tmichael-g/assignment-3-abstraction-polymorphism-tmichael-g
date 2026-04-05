@@ -20,26 +20,47 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: 'maven'
 
-    # --- 1. The Maven Test Runner ---
-    - name: Smart Home OOP Test
-      id: oop-test
+    # --- Test 1: Structural Check (Abstraction & Encapsulation) ---
+    - name: Structure Test
+      id: structure-test
       uses: classroom-resources/autograding-io-grader@v1
       with:
-        test-name: Abstraction and Polymorphism Logic
-        setup-command: mvn -q clean compile
-        command: mvn test
-        # We look for "BUILD SUCCESS" which confirms all JUnit tests passed
-        expected-output: "BUILD SUCCESS"
-        comparison-method: contains
-        timeout: 5
-        max-score: 100
+        test-name: "OOP Structure: Abstraction & Private Fields"
+        setup-command: "mvn compile"
+        # We run only the specific structural tests from our JUnit file
+        command: "mvn test -Dtest=SmartHomeTest#testIsAbstract,SmartHomeTest#testPrivateFields"
+        timeout: 2
+        max-score: 30
 
-    # --- 2. The Reporter ---
+    # --- Test 2: Logic Check (Functional Output) ---
+    - name: Logic Test
+      id: logic-test
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: "Functionality: Device Activation Logic"
+        setup-command: "mvn compile"
+        command: "mvn test -Dtest=SmartHomeTest#testSmartLightLogic,SmartHomeTest#testSmartThermostatLogic"
+        timeout: 2
+        max-score: 40
+
+    # --- Test 3: Polymorphism Check ---
+    - name: Polymorphism Test
+      id: poly-test
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: "Polymorphism: Master Controller Loop"
+        setup-command: "mvn compile"
+        command: "mvn test -Dtest=SmartHomeTest#testMainUsesPolymorphicList"
+        timeout: 2
+        max-score: 30
+
+    # --- FINAL REPORTER ---
     - name: Autograding Reporter
       uses: classroom-resources/autograding-grading-reporter@v1
       env:
-        OOP-TEST_RESULTS: "${{ steps.oop-test.outputs.result }}"
+        STRUCTURE-TEST_RESULTS: "${{ steps.structure-test.outputs.result }}"
+        LOGIC-TEST_RESULTS: "${{ steps.logic-test.outputs.result }}"
+        POLY-TEST_RESULTS: "${{ steps.poly-test.outputs.result }}"
       with:
-        runners: oop-test
+        runners: structure-test, logic-test, poly-test
